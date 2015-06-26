@@ -3,5 +3,7 @@ source 'https://supermarket.chef.io'
 metadata
 
 cookbook 'git'
+cookbook 'libev'
 cookbook 'nginx'
 cookbook 'python'
+cookbook 'xml'
