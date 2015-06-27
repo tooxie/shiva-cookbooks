@@ -91,7 +91,7 @@ template "#{node['shiva']['shiva_conf_dir']}/#{node['shiva']['shiva_conf_file']}
   variables(
     :server_uri => node['shiva']['shiva_uri'],
     :secret_key => node['shiva']['shiva_key'],
-    :media_dir_root => node['shiva']['shiva_media_dir_root']
+    :media_dir_root => node['shiva']['shiva_media_dir_root'],
     :media_dir_url => node['shiva']['shiva_media_dir_url']
   )
   action :create
