@@ -23,6 +23,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+Chef::Log.level = :debug
+
 include_recipe 'build-essential::default'
 include_recipe 'git'
 include_recipe 'libev'
