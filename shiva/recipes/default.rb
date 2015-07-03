@@ -82,3 +82,23 @@ template node['shiva']['apache_conf'] do
   )
   action :create
 end
+
+
+# FIXME: Temporary hack to access apache logs.
+file '/var/log/apache2/error.log' do
+  mode '0644'
+  owner 'shiva'
+  group 'opsworks'
+end
+
+file '/var/log/apache2/access.log' do
+  mode '0644'
+  owner 'shiva'
+  group 'opsworks'
+end
+
+file '/var/log/apache2/other_vhosts_access.log' do
+  mode '0644'
+  owner 'shiva'
+  group 'opsworks'
+end
