@@ -32,3 +32,76 @@ include_recipe 'nginx'
 include_recipe 'xml'
 
 package 'libffi-dev'
+
+directory '/var/venv' do
+  owner  'root'
+  group  'root'
+  mode   '0755'
+  action :create
+end
+
+directory '/var/git' do
+  owner  'root'
+  group  'root'
+  mode   '0755'
+  action :create
+end
+
+directory node['shiva']['shiva_conf_dir'] do
+  owner  'root'
+  group  'root'
+  mode   '0755'
+  action :create
+end
+
+python_pip 'virtualenv' do
+  action :install
+end
+
+python_virtualenv node['shiva']['venv_path'] do
+  action :create
+end
+
+python_pip 'uwsgi' do
+  virtualenv node['shiva']['venv_path']
+  action :install
+end
+
+git node['shiva']['git_path'] do
+  repository node['shiva']['git_repo']
+  reference  'master'
+  action     :sync
+end
+
+bash 'shiva_install' do
+  code "#{node['shiva']['venv_path']}/bin/python setup.py install"
+  cwd node['shiva']['git_path']
+end
+
+template '/etc/nginx/sites-enabled/shiva.conf' do
+  source node['shiva']['nginx_conf']
+  variables(
+    :access_log => node['shiva']['shiva_log_access'],
+    :error_log => node['shiva']['shiva_log_error'],
+    :port => node['shiva']['shiva_port'],
+  )
+  action :create
+end
+
+template "#{node['shiva']['shiva_conf_dir']}/#{node['shiva']['shiva_conf_file']}" do
+  source node['shiva']['shiva_conf_template']
+  variables(
+    :server_uri => node['shiva']['shiva_uri'],
+    :secret_key => node['shiva']['shiva_key'],
+    :media_dir_root => node['shiva']['shiva_media_dir_root'],
+    :media_dir_url => node['shiva']['shiva_media_dir_url']
+  )
+  action :create
+end
+
+command = "#{node['shiva']['venv_path']}/bin/uwsgi --socket /tmp/uwsgi.sock -w shiva.app:app &"
+
+bash 'shiva_run' do
+  code command
+  environment "SHIVA_CONFIG" => "#{node['shiva']['shiva_conf_dir']}/#{node['shiva']['shiva_conf_file']}"
+end
