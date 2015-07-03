@@ -89,7 +89,7 @@ file node['shiva']['uwsgi_log'] do
   action :create
 end
 
-command = "uwsgi --socket /tmp/uwsgi.sock -w shiva.app:app --logto #{node['shiva']['uwsgi_log']}"
+command = "uwsgi --socket /tmp/uwsgi.sock -w shiva.app:app --daemonize #{node['shiva']['uwsgi_log']}"
 
 bash 'shiva_run' do
   code command
