@@ -96,7 +96,12 @@ template "#{node['shiva']['shiva_conf_dir']}/#{node['shiva']['shiva_conf_file']}
   action :create
 end
 
-command = "#{node['shiva']['venv_path']}/bin/uwsgi --socket /tmp/uwsgi.sock -w shiva.app:app &"
+file node['shiva']['uwsgi_log'] do
+  mode '0744'
+  action :create
+end
+
+command = "#{node['shiva']['venv_path']}/bin/uwsgi --socket /tmp/uwsgi.sock -w shiva.app:app --logto #{node['shiva']['uwsgi_log']}"
 
 bash 'shiva_run' do
   code command
