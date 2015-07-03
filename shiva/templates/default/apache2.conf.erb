@@ -1,0 +1,13 @@
+<VirtualHost *:<%= @port %>>
+    ServerName 127.0.0.1
+
+    WSGIDaemonProcess shiva user=www-data group=www-data threads=5
+    WSGIScriptAlias / <%= @wsgi_path %>
+
+    <Directory <%= @shiva_path %>>
+        WSGIProcessGroup shiva
+        WSGIApplicationGroup %{GLOBAL}
+        Order deny,allow
+        Allow from all
+    </Directory>
+</VirtualHost>
