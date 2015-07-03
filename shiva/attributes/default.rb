@@ -1,5 +1,5 @@
 override['libev']['version'] = '4.20'
-override['nginx']['log_dir_perm'] = '0755'
+override[:apache][:logrotate][:mode] = '0644'
 
 default['shiva']['git_path'] = '/var/git/shiva-server'
 default['shiva']['git_repo'] = 'https://github.com/tooxie/shiva-server.git'
