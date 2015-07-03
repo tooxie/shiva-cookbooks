@@ -34,13 +34,6 @@ include_recipe 'xml'
 
 package 'libffi-dev'
 
-directory '/var/venv' do
-  owner  'root'
-  group  'root'
-  mode   '0755'
-  action :create
-end
-
 directory '/var/git' do
   owner  'root'
   group  'root'
@@ -55,12 +48,7 @@ directory node['shiva']['shiva_conf_dir'] do
   action :create
 end
 
-python_virtualenv node['shiva']['venv_path'] do
-  action :create
-end
-
 python_pip 'uwsgi' do
-  virtualenv node['shiva']['venv_path']
   action :install
 end
 
@@ -71,7 +59,7 @@ git node['shiva']['git_path'] do
 end
 
 bash 'shiva_install' do
-  code "#{node['shiva']['venv_path']}/bin/python setup.py install"
+  code "python setup.py install"
   cwd node['shiva']['git_path']
 end
 
@@ -101,7 +89,7 @@ file node['shiva']['uwsgi_log'] do
   action :create
 end
 
-command = "#{node['shiva']['venv_path']}/bin/uwsgi --socket /tmp/uwsgi.sock -w shiva.app:app --logto #{node['shiva']['uwsgi_log']}"
+command = "uwsgi --socket /tmp/uwsgi.sock -w shiva.app:app --logto #{node['shiva']['uwsgi_log']}"
 
 bash 'shiva_run' do
   code command
