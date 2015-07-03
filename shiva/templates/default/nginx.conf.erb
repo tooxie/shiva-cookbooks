@@ -1,0 +1,13 @@
+server {
+  listen <%= @port %>;
+  server_name shiva;
+
+  access_log <%= @access_log %>;
+  error_log <%= @error_log %>;
+
+  location / { try_files $uri @shiva; }
+  location @shiva {
+    include      uwsgi_params;
+    uwsgi_pass   unix:/tmp/uwsgi.sock;
+  }
+}
