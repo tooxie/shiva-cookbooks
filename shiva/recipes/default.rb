@@ -29,6 +29,7 @@ include_recipe 'build-essential::default'
 include_recipe 'git'
 include_recipe 'libev'
 include_recipe 'nginx'
+include_recipe 'python::default'
 include_recipe 'xml'
 
 package 'libffi-dev'
@@ -52,10 +53,6 @@ directory node['shiva']['shiva_conf_dir'] do
   group  'root'
   mode   '0755'
   action :create
-end
-
-python_pip 'virtualenv' do
-  action :install
 end
 
 python_virtualenv node['shiva']['venv_path'] do
