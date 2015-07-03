@@ -3,6 +3,8 @@ override[:apache][:logrotate][:mode] = '0644'
 
 default['shiva']['git_path'] = '/var/git/shiva-server'
 default['shiva']['git_repo'] = 'https://github.com/tooxie/shiva-server.git'
+# TODO: Switch to apache in the main branch, but have a specific branch with
+# nginx conf.
 default['shiva']['nginx_conf'] = 'nginx.conf.erb'
 default['shiva']['shiva_conf_dir'] = '/var/conf'
 default['shiva']['shiva_conf_file'] = 'shiva.conf'
