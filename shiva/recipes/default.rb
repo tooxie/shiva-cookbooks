@@ -26,3 +26,9 @@
 Chef::Log.level = :debug
 
 include_recipe 'build-essential::default'
+include_recipe 'git'
+include_recipe 'libev'
+include_recipe 'nginx'
+include_recipe 'xml'
+
+package 'libffi-dev'
