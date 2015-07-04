@@ -73,6 +73,10 @@ template node['shiva']['wsgi_path'] do
   action :create
 end
 
+file '/etc/apache2/sites-enabled/000-default.conf' do
+  action :delete
+end
+
 template node['shiva']['apache_conf'] do
   source node['shiva']['apache_conf_template']
   variables(
