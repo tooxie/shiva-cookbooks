@@ -1,6 +1,8 @@
 <VirtualHost *>
     ServerName 127.0.0.1
 
+    LoadModule wsgi_module modules/mod_wsgi.so
+
     WSGIDaemonProcess shiva user=www-data group=www-data threads=5
     WSGIScriptAlias / <%= @wsgi_path %>
 

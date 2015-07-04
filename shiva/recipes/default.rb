@@ -83,6 +83,40 @@ template node['shiva']['apache_conf'] do
   action :create
 end
 
+# mod_wsgi
+# https://github.com/GrahamDumpleton/mod_wsgi/archive/4.4.13.tar.gz
+# 0. Install apache2-dev
+# 1. Download source
+# 2. Uncompress
+# 3. configure
+# 4. make
+# 5. make install
+# 6. LoadModule wsgi_module modules/mod_wsgi.so
+
+package 'apache2-dev'
+
+directory '/var/git/mod_wsgi' do
+  owner  'root'
+  group  'root'
+  mode   '0764'
+  action :create
+end
+
+git '/var/git/mod_wsgi' do
+  repository 'https://github.com/GrahamDumpleton/mod_wsgi.git'
+  reference  'master'
+  action     :sync
+end
+
+bash 'install mod_wsgi' do
+  cwd '/var/git/mod_wsgi'
+  code <<-EOH
+  ./configure
+  make
+  make install
+  EOH
+end
+
 
 # FIXME: Temporary hack to access apache logs.
 file '/var/log/apache2/error.log' do
