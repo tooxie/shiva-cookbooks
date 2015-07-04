@@ -25,79 +25,89 @@
 #
 Chef::Log.level = :debug
 
-include_recipe 'build-essential::default'
+include_recipe 'build-essential'
 include_recipe 'git'
 include_recipe 'libev'
-include_recipe 'python::default'
+include_recipe 'python'
 include_recipe 'xml'
 
-package 'libffi-dev'
+# Packages
+package 'apache2-dev'
 package 'libapache2-mod-wsgi'
+package 'libffi-dev'
+package 'pypy'
+package 'python-cffi'
+package 'python-dev'
 
+# Groups
+group 'opsworks' do
+  action :modify
+  members 'www-data'
+  append true
+end
+
+group 'adm' do
+  action :modify
+  members 'shiva'
+  append true
+end
+
+# Directories
 directory '/var/git' do
-  owner  'root'
-  group  'root'
+  owner  'shiva'
+  group  'opsworks'
   mode   '0755'
   action :create
 end
 
-git node['shiva']['git_path'] do
-  repository node['shiva']['git_repo']
-  reference  'master'
+directory '/var/venv' do
+  owner  'shiva'
+  group  'opsworks'
+  mode   '0755'
+  action :create
+end
+
+directory '/var/www/.python-eggs' do
+  owner  'shiva'
+  group  'opsworks'
+  mode   '0775'
+  action :create
+end
+
+# Virtualenv
+python_virtualenv '/var/venv/shiva' do
+  owner  'shiva'
+  group  'opsworks'
+  action :create
+end
+
+# bcrypt 2.0.0
+# https://github.com/pyca/bcrypt/archive/2.0.0.tar.gz
+
+directory '/var/git/bcrypt' do
+  owner  'shiva'
+  group  'opsworks'
+  mode   '0764'
+  action :create
+end
+
+git '/var/git/bcrypt' do
+  repository 'https://github.com/pyca/bcrypt.git'
+  revision   '2.0.0'
+  user       'shiva'
+  group      'opsworks'
   action     :sync
 end
 
-bash 'shiva_install' do
-  code 'python setup.py install'
-  cwd node['shiva']['git_path']
+bash 'bcrypt_install' do
+  code  '/var/venv/shiva/bin/python setup.py install'
+  user  'shiva'
+  group 'opsworks'
+  cwd   '/var/git/bcrypt'
 end
 
-template node['shiva']['wsgi_path'] do
-  source node['shiva']['wsgi_path_template']
-  action :create
-end
-
-template "#{node['shiva']['git_path']}/shiva/config/#{node['shiva']['shiva_conf_file']}" do
-  source node['shiva']['shiva_conf_template']
-  variables(
-    :media_dir_root => node['shiva']['shiva_media_dir_root'],
-    :media_dir_url => node['shiva']['shiva_media_dir_url'],
-    :secret_key => node['shiva']['shiva_key'],
-    :server_uri => node['shiva']['shiva_uri'],
-  )
-  action :create
-end
-
-template node['shiva']['wsgi_path'] do
-  source node['shiva']['wsgi_path_template']
-  action :create
-end
-
-file '/etc/apache2/sites-enabled/000-default.conf' do
-  action :delete
-end
-
-template node['shiva']['apache_conf'] do
-  source node['shiva']['apache_conf_template']
-  variables(
-    :port => node['shiva']['shiva_port'],
-    :shiva_path => node['shiva']['git_path'],
-    :wsgi_path => node['shiva']['wsgi_path'],
-  )
-  action :create
-end
-
-# mod_wsgi
+# mod_wsgi 4.4.13
 # https://github.com/GrahamDumpleton/mod_wsgi/archive/4.4.13.tar.gz
-# 0. Install apache2-dev
-# 1. Download source
-# 2. Uncompress
-# 3. configure
-# 4. make
-# 5. make install
-# 6. LoadModule wsgi_module modules/mod_wsgi.so
-
-package 'apache2-dev'
 
 directory '/var/git/mod_wsgi' do
   owner  'root'
@@ -108,7 +118,7 @@ end
 
 git '/var/git/mod_wsgi' do
   repository 'https://github.com/GrahamDumpleton/mod_wsgi.git'
-  reference  'master'
+  revision   '4.4.13'
   action     :sync
 end
 
@@ -121,22 +131,58 @@ bash 'install mod_wsgi' do
   EOH
 end
 
-
-# FIXME: Temporary hack to access apache logs.
-file '/var/log/apache2/error.log' do
-  mode '0644'
-  owner 'shiva'
-  group 'opsworks'
+# Shiva
+git node['shiva']['git_path'] do
+  repository node['shiva']['git_repo']
+  reference  'master'
+  user       'shiva'
+  group      'opsworks'
+  action     :sync
 end
 
-file '/var/log/apache2/access.log' do
-  mode '0644'
-  owner 'shiva'
-  group 'opsworks'
+template "#{node['shiva']['git_path']}/shiva/config/#{node['shiva']['shiva_conf_file']}" do
+  source node['shiva']['shiva_conf_template']
+  variables(
+    :media_dir_root => node['shiva']['shiva_media_dir_root'],
+    :media_dir_url => node['shiva']['shiva_media_dir_url'],
+    :secret_key => node['shiva']['shiva_key'],
+    :server_uri => node['shiva']['shiva_uri'],
+  )
+  owner  'shiva'
+  group  'opsworks'
+  mode   '0754'
+  action :create
 end
 
-file '/var/log/apache2/other_vhosts_access.log' do
-  mode '0644'
-  owner 'shiva'
+bash 'shiva_install' do
+  code  '/var/venv/shiva/bin/python setup.py install'
+  user  'shiva'
   group 'opsworks'
+  cwd   node['shiva']['git_path']
+end
+
+# Templates
+template node['shiva']['wsgi_path'] do
+  source node['shiva']['wsgi_path_template']
+  variables(
+    :path => '/var/venv/shiva',
+  )
+  owner  'shiva'
+  group  'opsworks'
+  mode   '0777'
+  action :create
+end
+
+template node['shiva']['apache_conf'] do
+  source node['shiva']['apache_conf_template']
+  variables(
+    :port => node['shiva']['shiva_port'],
+    :shiva_path => node['shiva']['git_path'],
+    :wsgi_path => node['shiva']['wsgi_path'],
+  )
+  action :create
+end
+
+file '/etc/apache2/sites-enabled/000-default.conf' do
+  action :delete
 end
