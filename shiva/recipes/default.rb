@@ -140,14 +140,14 @@ git node['shiva']['git_path'] do
   action     :sync
 end
 
-template "#{node['shiva']['git_path']}/shiva/config/#{node['shiva']['shiva_conf_file']}" do
-  source node['shiva']['shiva_conf_template']
+template "#{node['shiva']['git_path']}/shiva/config/#{node['shiva']['conf_file']}" do
+  source node['shiva']['conf_template']
   variables(
     :db_uri => node['shiva']['db_uri'],
-    :media_dir_root => node['shiva']['shiva_media_dir_root'],
-    :media_dir_url => node['shiva']['shiva_media_dir_url'],
-    :secret_key => node['shiva']['shiva_key'],
-    :server_uri => node['shiva']['shiva_uri'],
+    :media_dir_root => node['shiva']['media_dir_root'],
+    :media_dir_url => node['shiva']['media_dir_url'],
+    :secret_key => node['shiva']['secret_key'],
+    :server_uri => node['shiva']['server_uri'],
   )
   owner  'shiva'
   group  'opsworks'
@@ -192,7 +192,7 @@ end
 template node['shiva']['apache_conf'] do
   source node['shiva']['apache_conf_template']
   variables(
-    :port => node['shiva']['shiva_port'],
+    :port => node['shiva']['port'],
     :shiva_path => node['shiva']['git_path'],
     :wsgi_path => node['shiva']['wsgi_path'],
   )
