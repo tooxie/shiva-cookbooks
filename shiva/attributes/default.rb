@@ -6,6 +6,7 @@ default['shiva']['apache_conf_template'] = 'apache2.conf.erb'
 default['shiva']['git_path'] = '/var/git/shiva-server'
 default['shiva']['git_repo'] = 'https://github.com/tooxie/shiva-server.git'
 default['shiva']['shiva_conf_file'] = 'local.py'
+default['shiva']['db_uri'] = 'sqlite://'
 default['shiva']['shiva_conf_template'] = 'shiva.conf.erb'
 # http://docs.aws.amazon.com/opsworks/latest/userguide/workingstacks-json.html
 default['shiva']['shiva_key'] = ''  # Overwrite with custom JSON

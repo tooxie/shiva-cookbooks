@@ -143,6 +143,7 @@ end
 template "#{node['shiva']['git_path']}/shiva/config/#{node['shiva']['shiva_conf_file']}" do
   source node['shiva']['shiva_conf_template']
   variables(
+    :db_uri => node['shiva']['db_uri'],
     :media_dir_root => node['shiva']['shiva_media_dir_root'],
     :media_dir_url => node['shiva']['shiva_media_dir_url'],
     :secret_key => node['shiva']['shiva_key'],
@@ -158,6 +159,21 @@ bash 'shiva_install' do
   code  '/var/venv/shiva/bin/python setup.py install'
   user  'shiva'
   group 'opsworks'
+  cwd   node['shiva']['git_path']
+end
+
+python_pip 'psycopg2' do
+  virtualenv '/var/venv/shiva'
+  action :install
+end
+
+bash 'shiva_db_create' do
+  code  '/var/venv/shiva/bin/shiva-admin db create'
+  user  'shiva'
+  group 'opsworks'
+  environment(
+    'PYTHON_EGG_CACHE' => '/var/www/.python-eggs',
+  )
   cwd   node['shiva']['git_path']
 end
 
