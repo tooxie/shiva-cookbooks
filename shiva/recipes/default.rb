@@ -143,6 +143,7 @@ end
 template "#{node['shiva']['git_path']}/shiva/config/#{node['shiva']['conf_file']}" do
   source node['shiva']['conf_template']
   variables(
+    :anonymous_access => node['shiva']['anonymous_access'],
     :db_uri => node['shiva']['db_uri'],
     :media_dir_root => node['shiva']['media_dir_root'],
     :media_dir_url => node['shiva']['media_dir_url'],
